@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>진료 예약 목록</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+<h1>진료 예약 목록</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>예약 ID</th>
+        <th>의사 ID</th>
+        <th>환자 ID</th>
+        <th>예약 시간</th>
+        <th>취소</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="reservation : ${reservations}">
+        <td th:text="${reservation.id}"></td>
+        <td th:text="${reservation.doctorId}"></td>
+        <td th:text="${reservation.patientId}"></td>
+        <td th:text="${reservation.reservationTime}"></td>
+        <td>
+            <form th:action="@{/reservations/delete/{id}(id=${reservation.id})}" method="post">
+                <button type="submit">취소</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<a href="/reservations/new">새 예약 추가</a>
+</body>
+</html>
