@@ -1,18 +1,31 @@
 package com.example.hospitalreservation.dto;
 
+import com.example.hospitalreservation.model.Reservation;
+
 import java.time.LocalDateTime;
 
-public class ReservationDto {
+public class ReservationResponseDto {
     private final Long id;
     private final Long doctorId;
     private final Long patientId;
     private final LocalDateTime reservationTime;
 
-    public ReservationDto(Long id, Long doctorId, Long patientId, LocalDateTime reservationTime) {
+    // 생성자
+    public ReservationResponseDto(Long id, Long doctorId, Long patientId, LocalDateTime reservationTime) {
         this.id = id;
         this.doctorId = doctorId;
         this.patientId = patientId;
         this.reservationTime = reservationTime;
+    }
+
+    // 정적 팩토리 메서드
+    public static ReservationResponseDto fromReservation(Reservation reservation) {
+        return new ReservationResponseDto(
+                reservation.getId(),
+                reservation.getDoctorId(),
+                reservation.getPatientId(),
+                reservation.getReservationTime()
+        );
     }
 
     public Long getId() {
@@ -22,10 +35,13 @@ public class ReservationDto {
     public Long getDoctorId() {
         return doctorId;
     }
+
     public Long getPatientId() {
         return patientId;
     }
+
     public LocalDateTime getReservationTime() {
         return reservationTime;
+
     }
 }

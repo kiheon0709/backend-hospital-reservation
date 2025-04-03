@@ -1,6 +1,5 @@
 package com.example.hospitalreservation.service;
 
-import com.example.hospitalreservation.dto.ReservationDto;
 import com.example.hospitalreservation.model.Doctor;
 import com.example.hospitalreservation.model.Reservation;
 import com.example.hospitalreservation.repository.DoctorRepository;
@@ -31,10 +30,8 @@ public class ReservationService {
     }
 
     // TODO : 모든 예약 리스트를 조회하는 코드를 작성해주세요.
-    public List<ReservationDto> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(Reservation::getReservationDto) // 도메인 → DTO 변환
-                .collect(Collectors.toList());
+    public List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
     }
 
     // TODO : 새로운 예약을 생성하는 코드를 작성해주세요.

@@ -1,13 +1,16 @@
 package com.example.hospitalreservation.controller;
 
-import com.example.hospitalreservation.dto.ReservationDto;
+import com.example.hospitalreservation.dto.ReservationRequestDto;
+import com.example.hospitalreservation.dto.ReservationResponseDto;
 import com.example.hospitalreservation.model.Reservation;
 import com.example.hospitalreservation.service.ReservationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 // TODO : 컨트롤러에 필요한 어노테이션을 작성해주세요.
 // TODO : 요청 경로는 templates를 참고하여 작성해주세요.
+
 @Controller
 @RequestMapping("/reservations")
 public class ReservationController {
@@ -26,12 +30,13 @@ public class ReservationController {
     }
 
     // TODO : 필요한 어노테이션을 작성해주세요.
-    @GetMapping
-    public String getReservations(Model model) {
+    @GetMapping("/reservations")
+    public List<ReservationResponseDto> getReservations() {
         // TODO : 예약 메인 페이지를 가져오는 코드를 작성해주세요.
-        List<ReservationDto> reservations = reservationService.getAllReservations();
-        model.addAttribute("reservations", reservations);
-        return "index";
+        List<Reservation> reservations = reservationService.getAllReservations();
+        return reservations.stream()
+                .map(ReservationResponseDto::fromReservation)
+                .collect(Collectors.toList());
     }
 
     // TODO : 필요한 어노테이션을 작성해주세요.
@@ -43,21 +48,15 @@ public class ReservationController {
 
     // TODO : 필요한 어노테이션을 작성해주세요.
     @PostMapping
-    public String createReservation(
-            @RequestParam Long doctorId,
-            @RequestParam Long patientId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+    public ResponseEntity<ReservationResponseDto> createReservation(@RequestBody ReservationRequestDto requestDto) {
         // TODO : 예약을 진행하는 코드를 작성해주세요.
-        try {
-            Reservation reservation = reservationService.createReservation(doctorId, patientId, reservationTime);
-            redirectAttributes.addFlashAttribute("successMessage", "예약이 완료되었습니다. (예약 ID: " + reservation.getId() + ")");
-            return "redirect:/reservations";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "reservation_form"; // 다시 그 페이지 보여줌
-        }
+        Reservation reservation = reservationService.createReservation(
+                requestDto.getDoctorId(),
+                requestDto.getPatientId(),
+                requestDto.getReservationTime()
+        );
+        ReservationResponseDto responseDto = ReservationResponseDto.fromReservation(reservation);
+        return ResponseEntity.ok(responseDto);
     }
 
     // TODO : 필요한 어노테이션을 작성해주세요.
