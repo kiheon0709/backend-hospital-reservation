@@ -19,8 +19,8 @@ public class ReservationRepository {
     }
 
     // TODO : 예약 엔티티를 저장하는 코드를 작성해주세요.
-    public Reservation save(Long doctorId, Long patientId, LocalDateTime reservationTime) {
-        Reservation reservation = new Reservation(nextId++, doctorId, patientId, reservationTime);
+    public Reservation save(Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime) {
+        Reservation reservation = new Reservation(nextId++, doctorId, patientId, reservationStartTime, reservationEndTime);
         reservations.add(reservation);
         return reservation;
     }

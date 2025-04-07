@@ -8,14 +8,16 @@ public class Reservation {
     private final Long id;
     private final Long doctorId;
     private final Long patientId;
-    private final LocalDateTime reservationTime;
+    private final LocalDateTime reservationStartTime;
+    private final LocalDateTime reservationEndTime;
 
     // TODO : 필요한 메서드가 있다면 작성해주세요.
-    public Reservation(Long id, Long doctorId, Long patientId, LocalDateTime reservationTime) {
+    public Reservation(Long id, Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime) {
         this.id = id;
         this.doctorId = doctorId;
         this.patientId = patientId;
-        this.reservationTime = reservationTime;
+        this.reservationStartTime = reservationStartTime;
+        this.reservationEndTime = reservationEndTime;
     }
 
     public Long getId() {
@@ -30,7 +32,11 @@ public class Reservation {
         return patientId;
     }
 
-    public LocalDateTime getReservationTime() {
-        return reservationTime;
+    public LocalDateTime getReservationStartTime() {
+        return reservationStartTime;
+    }
+
+    public LocalDateTime getReservationEndTime() {
+        return reservationEndTime;
     }
 }

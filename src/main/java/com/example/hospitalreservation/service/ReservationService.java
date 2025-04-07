@@ -1,5 +1,6 @@
 package com.example.hospitalreservation.service;
 
+import com.example.hospitalreservation.dto.ReservationRequestDto;
 import com.example.hospitalreservation.model.Doctor;
 import com.example.hospitalreservation.model.Reservation;
 import com.example.hospitalreservation.repository.DoctorRepository;
@@ -35,35 +36,43 @@ public class ReservationService {
     }
 
     // TODO : 새로운 예약을 생성하는 코드를 작성해주세요.
-    public Reservation createReservation(Long doctorId, Long patientId, LocalDateTime reservationTime) {
+    public Reservation createReservation(ReservationRequestDto dto) {
         //실제 있는 의사 id인지 확인한 후에 예약생성하는 로직을 예약repository에 만들기 위해서는 reservationRepository와 doctorRepository가 충돌하므로, 한계층 위인 Service계층에서 검증하는게 맞음.
-        validateReservation(doctorId, patientId, reservationTime);
-        return reservationRepository.save(doctorId, patientId, reservationTime);
+        validateReservation(dto.getDoctorId(), dto.getPatientId(), dto.getReservationStartTime(), dto.getReservationEndTime());
+        return reservationRepository.save(dto.getDoctorId(), dto.getPatientId(), dto.getReservationStartTime(), dto.getReservationEndTime());
     }
 
     // 예약 검증 메서드
-    public void validateReservation(Long doctorId, Long patientId, LocalDateTime reservationTime) {
+    public void validateReservation(Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime) {
         // 의사id 유효성 검증
         Doctor doctor = doctorRepository.findById(doctorId); // 없는 의사 id이면 예외처리
 
-        // 과거시간대로 예약할 수 없음
-        if (reservationTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다.");
+        // 예약 시작시간은 현재시간 이후여야함
+        if (reservationStartTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다. (예약 시작 시간 오류)");
+        }
+
+        // 예약 종료시간은 현재시간 이후여야함
+        if (reservationEndTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다. (예약 종료 시간 오류)");
         }
 
         // 진료시간 확인
-        if (!doctor.isWithinConsultationTime(reservationTime.toLocalTime())) {
+        if (!(doctor.isWithinConsultationTime(reservationStartTime.toLocalTime()) && doctor.isWithinConsultationTime(reservationEndTime.toLocalTime()))) {
             // 의사 진료 가능 시간은 enum에 저장해놨지만, 결국 진료시간의 진짜 주인은 doctor 객체이기 때문에 doctor객체에서 getter을 통해 가져오기로 함
             throw new IllegalArgumentException(
                     "의사의 진료 가능 시간(" + doctor.getConsultationStartTime() + " ~ " + doctor.getConsultationEndTime() + ") 내에서만 예약할 수 있습니다."
             );
         }
 
-        // 예약시간 중복 확인, 지금은 의사 1명이지만 여러명일 경우 각 의사에 대해 예약시간이 중복되는지 확인해야함
-        for (Reservation existReservations : reservationRepository.findAll()) {
-            if (existReservations.getDoctorId().equals(doctorId) &&
-                    existReservations.getReservationTime().equals(reservationTime)) {
-                throw new IllegalArgumentException("해당 시간에는 이미 예약이 있습니다. 다른 시간을 선택해주세요.");
+        // 예약시간 중복 확인, 하나의 의사 id에 대해서 예약이 중복되는지 확인하기
+        for (Reservation existing : reservationRepository.findAll()) {
+            if (existing.getDoctorId().equals(doctorId)) {
+                // 겹치는지 확인
+                if (reservationStartTime.isBefore(existing.getReservationEndTime()) &&
+                        reservationEndTime.isAfter(existing.getReservationStartTime())) {
+                    throw new IllegalArgumentException("해당 시간에는 이미 예약이 있습니다. 다른 시간을 선택해주세요.");
+                }
             }
         }
     }

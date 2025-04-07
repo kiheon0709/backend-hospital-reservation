@@ -8,14 +8,16 @@ public class ReservationResponseDto {
     private final Long id;
     private final Long doctorId;
     private final Long patientId;
-    private final LocalDateTime reservationTime;
+    private final LocalDateTime reservationStartTime;
+    private final LocalDateTime reservationEndTime;
 
     // 생성자
-    public ReservationResponseDto(Long id, Long doctorId, Long patientId, LocalDateTime reservationTime) {
+    public ReservationResponseDto(Long id, Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime) {
         this.id = id;
         this.doctorId = doctorId;
         this.patientId = patientId;
-        this.reservationTime = reservationTime;
+        this.reservationStartTime = reservationStartTime;
+        this.reservationEndTime = reservationEndTime;
     }
 
     // 정적 팩토리 메서드
@@ -24,7 +26,8 @@ public class ReservationResponseDto {
                 reservation.getId(),
                 reservation.getDoctorId(),
                 reservation.getPatientId(),
-                reservation.getReservationTime()
+                reservation.getReservationStartTime(),
+                reservation.getReservationEndTime()
         );
     }
 
@@ -40,8 +43,11 @@ public class ReservationResponseDto {
         return patientId;
     }
 
-    public LocalDateTime getReservationTime() {
-        return reservationTime;
+    public LocalDateTime getReservationStartTime() {
+        return reservationStartTime;
+    }
 
+    public LocalDateTime getReservationEndTime() {
+        return reservationEndTime;
     }
 }
