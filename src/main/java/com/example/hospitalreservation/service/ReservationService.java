@@ -49,12 +49,17 @@ public class ReservationService {
 
         // 예약 시작시간은 현재시간 이후여야함
         if (reservationStartTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다. (예약 시작 시간 오류)");
+            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다.");
         }
 
         // 예약 종료시간은 현재시간 이후여야함
         if (reservationEndTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다. (예약 종료 시간 오류)");
+            throw new IllegalArgumentException("현재 시간 이후로만 예약할 수 있습니다.");
+        }
+
+        // 예약 종료시간은 예약 시작시간 이후여야함
+        if (reservationEndTime.isBefore(reservationStartTime)) {
+            throw new IllegalArgumentException("예약 종료시간은 예약 시작시간보다 늦어야 합니다.");
         }
 
         // 진료시간 확인

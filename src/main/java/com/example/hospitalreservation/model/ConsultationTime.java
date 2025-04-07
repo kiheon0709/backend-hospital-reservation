@@ -3,7 +3,7 @@ package com.example.hospitalreservation.model;
 import java.time.LocalTime;
 
 public enum ConsultationTime {
-    NINE_TO_FIVE(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+    NINE_TO_FIVE(LocalTime.of(9, 0), LocalTime.of(17, 1)),
     TEN_TO_SIX(LocalTime.of(10, 0), LocalTime.of(18, 0));
 
     private final LocalTime start;
