@@ -36,10 +36,20 @@ public class ReservationService {
     }
 
     // TODO : 새로운 예약을 생성하는 코드를 작성해주세요.
-    public Reservation createReservation(ReservationRequestDto dto) {
+    public Reservation createReservation(
+            Reservation reservation) {
         //실제 있는 의사 id인지 확인한 후에 예약생성하는 로직을 예약repository에 만들기 위해서는 reservationRepository와 doctorRepository가 충돌하므로, 한계층 위인 Service계층에서 검증하는게 맞음.
-        validateReservation(dto.getDoctorId(), dto.getPatientId(), dto.getReservationStartTime(), dto.getReservationEndTime());
-        return reservationRepository.save(dto.getDoctorId(), dto.getPatientId(), dto.getReservationStartTime(), dto.getReservationEndTime());
+        validateReservation(
+                reservation.getDoctorId(),
+                reservation.getPatientId(),
+                reservation.getReservationStartTime(),
+                reservation.getReservationEndTime());
+        return reservationRepository.save(
+                reservation.getDoctorId(),
+                reservation.getPatientId(),
+                reservation.getReservationStartTime(),
+                reservation.getReservationEndTime(),
+                reservation.getMedicalPurpose());
     }
 
     // 예약 검증 메서드
