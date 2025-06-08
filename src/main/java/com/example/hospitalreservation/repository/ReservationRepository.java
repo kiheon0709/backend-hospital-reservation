@@ -3,37 +3,14 @@ package com.example.hospitalreservation.repository;
 import com.example.hospitalreservation.model.Doctor;
 import com.example.hospitalreservation.model.Reservation;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
-public class ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+    // 기본적인 CRUD 메서드는 자동 제공
+    // findAll(), save(), deleteById(), findById()
 
-    private final List<Reservation> reservations = new ArrayList<>();
-    private Long nextId = 1L;
-
-    // TODO : 모든 예약 엔티티를 조회하는 코드를 작성해주세요.
-    public List<Reservation> findAll() {
-        return reservations;
-    }
-
-    // TODO : 예약 엔티티를 저장하는 코드를 작성해주세요.
-    public Reservation save(Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String medicalPurpose) {
-        Reservation reservation = new Reservation(nextId++, doctorId, patientId, reservationStartTime, reservationEndTime, medicalPurpose);
-        reservations.add(reservation);
-        return reservation;
-    }
-
-    // TODO : 예약 엔티티를 삭제하는 코드를 작성해주세요.
-    public void deleteById(Long id) {
-        reservations.removeIf(reservation -> reservation.getId().equals(id));
-    }
-
-    public Reservation findById(Long id) {
-        return reservations.stream()
-                .filter(r -> r.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
+    List<Reservation> findByDoctor_Id(Long doctorId);
 }

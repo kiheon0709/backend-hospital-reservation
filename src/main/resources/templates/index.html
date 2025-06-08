@@ -23,8 +23,9 @@
                 <thead>
                 <tr>
                     <th>예약 ID</th>
-                    <th>의사 ID</th>
-                    <th>환자 ID</th>
+                    <th>의사 이름</th>
+                    <th>환자 이름</th>
+                    <th>환자 전화번호</th>
                     <th>시작 시간</th>
                     <th>종료 시간</th>
                     <th>예상 금액</th>
@@ -37,6 +38,7 @@
         </div>
     </div>
 
+    <!-- 예약 취소 모달 -->
     <div id="cancellationModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -50,7 +52,6 @@
                         <label for="cancelReason">취소 사유:</label>
                         <textarea id="cancelReason" name="cancelReason" required></textarea>
                     </div>
-
                     <div class="form-actions">
                         <button type="submit" class="btn btn-danger">취소 확인</button>
                         <button type="button" class="btn btn-secondary close-form">돌아가기</button>
@@ -63,18 +64,14 @@
 
 <script>
     $(document).ready(function() {
-        // Load all reservations when page loads
         loadReservations();
 
-        // Close modals when clicking on x or cancel button
         $(".close-modal, .close-form").click(function() {
-            $(".modal").css("display", "none");
+            $(".modal").hide();
         });
 
-        // Handle cancellation form submission
         $("#cancellationForm").submit(function(e) {
             e.preventDefault();
-
             const reservationId = $("#cancellationReservationId").val();
             const cancelReason = $("#cancelReason").val();
 
@@ -84,20 +81,20 @@
                 contentType: "application/json",
                 data: JSON.stringify({ cancelReason: cancelReason }),
                 success: function() {
-                    $("#cancellationModal").css("display", "none");
+                    $("#cancellationModal").hide();
                     $("#cancellationForm")[0].reset();
                     loadReservations();
                     showNotification("예약이 취소되었습니다.", "success");
                 },
                 error: function(xhr) {
-                    showNotification("예약 취소 실패: " + xhr.responseJSON.message, "error");
+                    showNotification("예약 취소 실패: " + (xhr.responseJSON?.message || "알 수 없는 오류"), "error");
                 }
             });
         });
 
         $(window).click(function(e) {
             if ($(e.target).hasClass("modal")) {
-                $(".modal").css("display", "none");
+                $(".modal").hide();
             }
         });
     });
@@ -110,77 +107,62 @@
             padNumber(date.getMinutes());
     }
 
+    function padNumber(num) {
+        return num.toString().padStart(2, '0');
+    }
+
     function loadReservations() {
         $.ajax({
             url: "/api/reservations",
             type: "GET",
             success: function(reservations) {
-
-                console.log("불러온 예약 목록", reservations);
-                console.log("타입:", typeof reservations);
-                console.log("isArray?", Array.isArray(reservations));
-
                 const tableBody = $("#reservationTableBody");
                 tableBody.empty();
 
                 if (reservations.length === 0) {
-                    tableBody.append('<tr><td colspan="5" class="no-data">예약 내역이 없습니다.</td></tr>');
+                    tableBody.append('<tr><td colspan="8" class="no-data">예약 내역이 없습니다.</td></tr>');
                     return;
                 }
 
-                reservations.forEach(function(reservation) {
-                    const startTime = new Date(reservation.reservationStartTime);
-                    const endTime = new Date(reservation.reservationEndTime);
+                reservations.forEach(function(res) {
+                    const startTime = new Date(res.reservationStartTime);
+                    const endTime = new Date(res.reservationEndTime);
 
-                    const formattedStartTime = formatDateTime(startTime);
-                    const formattedEndTime = formatDateTime(endTime);
-
-                    // <td>${reservation.fee.toLocaleString() ?? "계산 불가"}원</td>
                     const row = `
                         <tr>
-                            <td>${reservation.id}</td>
-                            <td>${reservation.doctorId}</td>
-                            <td>${reservation.patientId}</td>
-                            <td>${formattedStartTime}</td>
-                            <td>${formattedEndTime}</td>
-                            <td>${reservation.fee ? reservation.fee.toLocaleString() + "원" : "계산 불가"}</td>
+                            <td>${res.id}</td>
+                            <td>${res.doctorName}</td>
+                            <td>${res.patientName}</td>
+                            <td>${res.patientPhoneNumber}</td>
+                            <td>${formatDateTime(startTime)}</td>
+                            <td>${formatDateTime(endTime)}</td>
+                            <td>${res.fee ? res.fee.toLocaleString() + "원" : "계산 불가"}</td>
                             <td>
-                                <button class="btn btn-danger btn-sm cancel-reservation" data-id="${reservation.id}">
+                                <button class="btn btn-danger btn-sm cancel-reservation" data-id="${res.id}">
                                     취소
                                 </button>
                             </td>
                         </tr>
                     `;
-
                     tableBody.append(row);
                 });
 
                 $(".cancel-reservation").click(function() {
                     const reservationId = $(this).data("id");
                     $("#cancellationReservationId").val(reservationId);
-                    $("#cancellationModal").css("display", "block");
+                    $("#cancellationModal").show();
                 });
             },
-            error: function(xhr) {
-                showNotification("예약 목록을 불러오는데 실패했습니다.", "error");
+            error: function() {
+                showNotification("예약 목록 불러오기 실패", "error");
             }
         });
-    }
-
-    // Helper function to pad numbers with leading zero
-    function padNumber(num) {
-        return num.toString().padStart(2, '0');
     }
 
     function showNotification(message, type) {
         const notification = $("<div>").addClass("notification").addClass(type).text(message);
         $("body").append(notification);
-
-        setTimeout(function() {
-            notification.fadeOut(function() {
-                $(this).remove();
-            });
-        }, 3000);
+        setTimeout(() => notification.fadeOut(() => notification.remove()), 3000);
     }
 </script>
 </body>

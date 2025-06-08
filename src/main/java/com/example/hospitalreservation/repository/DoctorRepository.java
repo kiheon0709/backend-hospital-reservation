@@ -2,32 +2,23 @@ package com.example.hospitalreservation.repository;
 
 import com.example.hospitalreservation.model.ConsultationTime;
 import com.example.hospitalreservation.model.Doctor;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
-public class DoctorRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-    private final List<Doctor> doctors = new ArrayList<>();
+public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
-    public DoctorRepository() {
-        doctors.add(new Doctor(
-                1L, "의사1", "미정",
-                ConsultationTime.NINE_TO_FIVE.getStart(),
-                ConsultationTime.NINE_TO_FIVE.getEnd()));
-    }
+    // 진료목적에 맞는 의사 탐색
+//    List<Doctor> findByMedicalPurpose(String medicalPurpose);
 
-    public Doctor findById(Long id) {
-        return doctors.stream()
-                .filter(d -> d.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 의사를 찾을 수 없습니다."));
-    }
+    // 진료시간에 맞는 의사 탐색
+    @Query("SELECT d FROM Doctor d WHERE d.consultationStartTime <= :startTime AND d.consultationEndTime >= :endTime")
+    List<Doctor> findByAvailableTimeRange(@Param("startTime") LocalTime startTime,
+                                          @Param("endTime") LocalTime endTime);
 
-    public List<Doctor> findAll() {
-        return doctors;
-    }
 }

@@ -1,21 +1,35 @@
 package com.example.hospitalreservation.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Entity
 public class Doctor {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false)
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "specialization", nullable = false)
     private String specialization;
 
     // 의사 진료 시간
-    private final LocalTime consultationStartTime;
-    private final LocalTime consultationEndTime;
+    @Column(name = "consultationStartTime", nullable = false)
+    private LocalTime consultationStartTime;
+
+    @Column(name = "consultationEndTime", nullable = false)
+    private LocalTime consultationEndTime;
+
+    protected Doctor() { }
 
     // 생성자
-    public Doctor(Long id, String name, String specialization,
+    public Doctor(String name, String specialization,
                   LocalTime consultationStartTime, LocalTime consultationEndTime) {
-        this.id = id;
         this.name = name;
         this.specialization = specialization;
         this.consultationStartTime = consultationStartTime;
@@ -26,6 +40,10 @@ public class Doctor {
         return id;
     }
 
+    public String getName() { return name; }
+
+    public String getSpecialization() { return specialization; }
+
     public LocalTime getConsultationStartTime() {
         return consultationStartTime;
     }
@@ -34,8 +52,4 @@ public class Doctor {
         return consultationEndTime;
     }
 
-    // 이 시간에 진료가 가능한가 라는 판단을 의사 객체에서 수행함
-    public boolean isWithinConsultationTime(LocalTime time) {
-        return !time.isBefore(consultationStartTime) && time.isBefore(consultationEndTime);
-    }
 }

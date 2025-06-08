@@ -1,6 +1,7 @@
 package com.example.hospitalreservation.dto;
 
 import com.example.hospitalreservation.model.Reservation;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
@@ -8,17 +9,37 @@ import java.time.LocalDateTime;
 public class ReservationResponseDto {
     private final Long id;
     private final Long doctorId;
+    private final String doctorName;
     private final Long patientId;
+    private final String patientName;
+
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private final LocalDateTime reservationStartTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private final LocalDateTime reservationEndTime;
+
+    @JsonProperty("reason")
     private final String medicalPurpose;
+
     private final Long fee;
 
     // 생성자
-    public ReservationResponseDto(Long id, Long doctorId, Long patientId, LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String medicalPurpose, Long fee) {
+    public ReservationResponseDto(Long id,
+                                  Long doctorId,
+                                  String doctorName,
+                                  Long patientId,
+                                  String patientName,
+                                  LocalDateTime reservationStartTime,
+                                  LocalDateTime reservationEndTime,
+                                  String medicalPurpose,
+                                  Long fee) {
         this.id = id;
         this.doctorId = doctorId;
+        this.doctorName = doctorName;
         this.patientId = patientId;
+        this.patientName = patientName;
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.medicalPurpose = medicalPurpose;
@@ -30,12 +51,13 @@ public class ReservationResponseDto {
         return fromReservation(reservation, 0); // 진료비는 아직 계산 전이므로 0으로 초기화
     }
 
-    // 정적 팩토리 메서드
     public static ReservationResponseDto fromReservation(Reservation reservation, long fee) {
         return new ReservationResponseDto(
                 reservation.getId(),
-                reservation.getDoctorId(),
-                reservation.getPatientId(),
+                reservation.getDoctor().getId(),
+                reservation.getDoctor().getName(),
+                reservation.getPatient().getId(),
+                reservation.getPatient().getName(),
                 reservation.getReservationStartTime(),
                 reservation.getReservationEndTime(),
                 reservation.getMedicalPurpose(),
@@ -51,9 +73,13 @@ public class ReservationResponseDto {
         return doctorId;
     }
 
+    public String getDoctorName() { return doctorName; }
+
     public Long getPatientId() {
         return patientId;
     }
+
+    public String getPatientName() { return patientName; }
 
     public LocalDateTime getReservationStartTime() {
         return reservationStartTime;
